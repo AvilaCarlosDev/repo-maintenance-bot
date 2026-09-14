@@ -1,208 +1,74 @@
-# GitHub Streak Keeper 🟩
+# repo-maintenance-bot
 
-> Mantén tu actividad en GitHub con **mantenimiento real**, no con commits falsos.
+> Bot local de mantenimiento para varios repositorios: actualiza lockfiles, valida, y **solo commitea si el cambio es real y los tests pasan**.
 
 [![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/AvilaCarlosDev/github-streak-keeper?style=flat)](https://github.com/AvilaCarlosDev/github-streak-keeper/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/AvilaCarlosDev/github-streak-keeper?style=flat)](https://github.com/AvilaCarlosDev/github-streak-keeper/network)
+[![Shell](https://img.shields.io/badge/bash-5.x-4EAA25?logo=gnubash&logoColor=white)](auto-commit.sh)
 
-## 🎯 El Problema
+## El problema
 
-Automatizar commits vacíos o cambios artificiales puede mantener una racha, pero no aporta valor al proyecto y puede verse como spam.
+Cuando mantienes varios repos a la vez, las tareas pequenas se acumulan: lockfiles desactualizados, dependencias que se quedan atras, chequeos que nunca corres. Automatizarlo es tentador, pero un script que commitea a ciegas es peor que no tener nada: mete cambios sin validar en repos que creias estables.
 
-La mejor forma de mantener consistencia es convertir la automatización en un pequeño asistente de mantenimiento: revisar repos, detectar mejoras reales y crear commits solo cuando hay cambios útiles.
+Este script automatiza el mantenimiento **sin asumir que su propio cambio es correcto**.
 
-## 🛠️ La Solución
+## Como se comporta
 
-`auto-commit.sh` ahora funciona como un **maintenance bot local**:
-
-- inspecciona cada repositorio,
-- evita tocar repos con cambios locales sin revisar,
-- aplica mantenimiento seguro cuando corresponde,
-- ejecuta validaciones del proyecto,
-- crea commits solo si hay cambios reales,
-- nunca genera archivos fake de actividad.
-
-## ✅ Qué hace actualmente
-
-- ✅ Soporta múltiples repositorios.
-- ✅ Evita commits duplicados con checkpoints diarios.
-- ✅ Detecta repos sucios y los omite para no commitear trabajo sin revisar.
-- ✅ En proyectos Node con `package-lock.json`, ejecuta:
-
-```bash
-npm update --package-lock-only --ignore-scripts
-```
-
-- ✅ Ejecuta `npm test` si existe.
-- ✅ Ejecuta `npm run build` si existe.
-- ✅ Revierte cambios generados si la validación falla.
-- ✅ Crea commit solo cuando hay cambios reales.
-- ✅ Push opcional con `STREAK_KEEPER_PUSH=1`.
-- ✅ Modo simulación con `STREAK_KEEPER_DRY_RUN=1`.
-
-## 🚫 Qué NO hace
-
-- ❌ No crea commits vacíos.
-- ❌ No modifica archivos `.github-streak` artificiales.
-- ❌ No commitea cambios locales del usuario sin revisión.
-- ❌ No hace push automáticamente salvo que lo actives.
-- ❌ No fuerza cambios si no hay mantenimiento real.
-
-## 📦 Instalación
-
-```bash
-git clone https://github.com/AvilaCarlosDev/github-streak-keeper.git
-cd github-streak-keeper
-chmod +x auto-commit.sh
-```
-
-## 🚀 Uso
-
-### Ejecutar sobre un repo
-
-```bash
-./auto-commit.sh /home/carlosdev/proyectos/mi-proyecto
-```
-
-### Ejecutar sobre varios repos
-
-```bash
-./auto-commit.sh \
-  /home/carlosdev/proyectos/proyecto1 \
-  /home/carlosdev/proyectos/proyecto2
-```
-
-### Modo simulación recomendado
-
-Antes de automatizar, prueba sin crear commits:
-
-```bash
-STREAK_KEEPER_DRY_RUN=1 ./auto-commit.sh /home/carlosdev/proyectos/mi-proyecto
-```
-
-### Hacer push automáticamente
-
-Por defecto el script crea commits locales, pero no hace push.
-
-```bash
-STREAK_KEEPER_PUSH=1 ./auto-commit.sh /home/carlosdev/proyectos/mi-proyecto
-```
-
-### Omitir tests/build
-
-Útil si tienes repos lentos o sin entorno instalado:
-
-```bash
-STREAK_KEEPER_SKIP_TESTS=1 ./auto-commit.sh /home/carlosdev/proyectos/mi-proyecto
-```
-
-## ⏱️ Automatización con Cron
-
-Ejemplo prudente: una revisión diaria.
-
-```cron
-# GitHub Streak Keeper - mantenimiento real diario
-0 9 * * * STREAK_KEEPER_PUSH=1 /home/carlosdev/proyectos/github-streak-keeper/auto-commit.sh /home/carlosdev/proyectos/mi-proyecto >> /tmp/streak-keeper.log 2>&1
-```
-
-> Recomendación: evita correrlo 6 veces al día. Si el objetivo es mantenimiento real, 1 vez al día suele ser suficiente.
-
-## 🧩 Automatización con Systemd Timer
-
-Servicio:
-
-```ini
-# ~/.config/systemd/user/github-streak-keeper.service
-[Unit]
-Description=GitHub Streak Keeper - Real Maintenance
-Documentation=https://github.com/AvilaCarlosDev/github-streak-keeper
-After=network-online.target
-
-[Service]
-Type=oneshot
-Environment=STREAK_KEEPER_PUSH=1
-ExecStart=/home/carlosdev/proyectos/github-streak-keeper/auto-commit.sh /home/carlosdev/proyectos/mi-proyecto
-```
-
-Timer:
-
-```ini
-# ~/.config/systemd/user/github-streak-keeper.timer
-[Unit]
-Description=Run GitHub Streak Keeper daily
-
-[Timer]
-OnCalendar=*-*-* 09:00:00
-Persistent=true
-Unit=github-streak-keeper.service
-
-[Install]
-WantedBy=timers.target
-```
-
-Activar:
-
-```bash
-systemctl --user daemon-reload
-systemctl --user enable --now github-streak-keeper.timer
-systemctl --user list-timers
-```
-
-## 📋 Estrategia Recomendada
-
-1. Usa repos reales, no repos de relleno.
-2. Automatiza mantenimiento pequeño y verificable.
-3. Revisa logs con frecuencia.
-4. No ocultes fallos: si tests/build fallan, arregla el repo.
-5. Prefiere pocos commits buenos a muchos commits sin valor.
-
-## 📁 Estructura
-
-```text
-github-streak-keeper/
-├── auto-commit.sh
-├── examples/
-│   ├── cron-example
-│   ├── systemd-example.service
-│   └── systemd-example.timer
-├── README.md
-├── LICENSE
-└── .gitignore
-```
-
-## 🔧 Configuración
-
-Variables disponibles:
-
-| Variable | Uso |
+| Situacion | Que hace |
 |---|---|
-| `CHECKPOINT_DIR` | Carpeta para checkpoints diarios. Default: `/tmp/streak-keeper` |
-| `LOG_FILE` | Archivo de logs. Default: `/tmp/streak-keeper.log` |
-| `STREAK_KEEPER_DRY_RUN=1` | Simula sin commitear |
-| `STREAK_KEEPER_PUSH=1` | Hace push después del commit |
-| `STREAK_KEEPER_SKIP_TESTS=1` | Omite `npm test` / `npm run build` |
+| El repo tiene cambios locales sin commitear | **Se salta el repo.** No toca trabajo tuyo a medio hacer. |
+| Hay lockfile npm | `npm update --package-lock-only --ignore-scripts` (sin ejecutar scripts de terceros) |
+| Hay `package.json` pero no lockfile | No modifica nada: no hay forma segura de acotar el cambio |
+| El mantenimiento no produjo diff | No commitea |
+| `npm test` o `npm run build` fallan | **`git restore` y aborta ese repo.** No deja el repo roto |
+| Todo paso | Commitea con mensaje convencional (`build:` o `chore:`) |
+| Ya corrio hoy en ese repo | Se salta por checkpoint diario |
 
-## ⚠️ Nota ética
+El push **no** es automatico: es opt-in con `STREAK_KEEPER_PUSH=1`.
 
-Este proyecto no busca fabricar actividad falsa. Busca ayudarte a convertir la consistencia en mantenimiento real: dependencias al día, validaciones pasando y repos saludables.
+## Uso
 
-## 🤝 Contribuciones
+```bash
+./auto-commit.sh ~/code/proyecto-a ~/code/proyecto-b
+```
 
-¿Ideas para nuevos mantenedores seguros? Abre un issue o PR.
+Primero en seco, para ver que haria sin tocar nada:
 
-Posibles mejoras futuras:
+```bash
+STREAK_KEEPER_DRY_RUN=1 ./auto-commit.sh ~/code/proyecto-a
+```
 
-- soporte para `pnpm-lock.yaml`,
-- soporte para `yarn.lock`,
-- soporte para Python `requirements.txt`,
-- reportes Markdown diarios,
-- integración opcional con GitHub Actions.
+## Variables
 
-## 📄 Licencia
+| Variable | Default | Efecto |
+|---|---|---|
+| `STREAK_KEEPER_DRY_RUN` | `0` | Muestra el plan y revierte el stage, sin commitear |
+| `STREAK_KEEPER_PUSH` | `0` | Hace `git push` despues de un commit exitoso |
+| `STREAK_KEEPER_SKIP_TESTS` | `0` | Omite test y build (no recomendado) |
+| `CHECKPOINT_DIR` | `/tmp/streak-keeper` | Donde se guardan los checkpoints diarios |
+| `LOG_FILE` | `/tmp/streak-keeper.log` | Archivo de log |
 
-MIT License — ver [LICENSE](LICENSE).
+## Programarlo
 
----
+Con systemd (ver [`examples/`](examples/)):
 
-*Workspace mantenido por Carlos Avila - Developer 🇻🇪*
+```bash
+cp examples/systemd-example.service ~/.config/systemd/user/repo-maintenance.service
+cp examples/systemd-example.timer   ~/.config/systemd/user/repo-maintenance.timer
+systemctl --user enable --now repo-maintenance.timer
+```
+
+O con cron, usando [`examples/cron-example`](examples/cron-example).
+
+## Sobre las rachas de contribuciones
+
+Este repo se llamaba `github-streak-keeper`. El nombre daba a entender lo contrario de lo que hace el script, asi que cambio.
+
+**Generar actividad artificial en GitHub no sirve de nada.** Quien revisa tu perfil mira el contenido de los commits, no el color de los cuadritos. Si el mantenimiento real de tus repos produce commits, bienvenidos sean; si no hay nada que mantener, este script no commitea, y asi debe ser.
+
+## Alcance
+
+Hoy solo automatiza mantenimiento de **lockfiles npm**. La funcion `apply_maintenance()` esta preparada para sumar mas mantenedores seguros (requirements de Python, lockfile de Composer, pinning de GitHub Actions, lint/format del propio proyecto).
+
+## Licencia
+
+MIT — ver [LICENSE](LICENSE). Hecho por [Carlos Avila](https://github.com/AvilaCarlosDev).
