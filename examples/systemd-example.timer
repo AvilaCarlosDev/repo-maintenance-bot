@@ -1,17 +1,12 @@
 [Unit]
-Description=Run GitHub Streak Keeper real maintenance daily
-Documentation=https://github.com/AvilaCarlosDev/github-streak-keeper
-Requires=streak-keeper.service
+Description=Run Repo Maintenance Bot daily
+Documentation=https://github.com/AvilaCarlosDev/repo-maintenance-bot
 
 [Timer]
-# Ejecutar una vez al día a las 9:00 AM
 OnCalendar=*-*-* 09:00:00
-
-# Ejecutar si el equipo estaba apagado a esa hora
 Persistent=true
-
-# Unidad a activar
-Unit=streak-keeper.service
+RandomizedDelaySec=15m
+Unit=repo-maintenance.service
 
 [Install]
 WantedBy=timers.target
