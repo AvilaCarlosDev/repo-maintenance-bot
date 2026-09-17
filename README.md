@@ -6,6 +6,12 @@
 [![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Bash](https://img.shields.io/badge/bash-5.x-4EAA25?logo=gnubash&logoColor=white)](auto-commit.sh)
 
+## Demo real
+
+![Repo Maintenance Bot validando una actualización npm en Kitty](docs/assets/repo-maintenance-bot-demo.gif)
+
+La demo ejecuta [`scripts/demo-session.sh`](scripts/demo-session.sh) contra un repositorio npm temporal. El bot valida una actualización en un clon aislado y el cierre comprueba que el repositorio fuente conserva el mismo commit, lockfile y working tree limpio. También está disponible una [captura estática en PNG](docs/assets/repo-maintenance-bot-demo.png).
+
 ## Por qué existe
 
 Actualizar un lockfile parece una tarea pequeña, pero validar con el **node_modules** anterior produce una falsa sensación de seguridad. Modificar directamente el repositorio también puede dejar archivos generados, stages accidentales o un dry-run que no era realmente seco.
