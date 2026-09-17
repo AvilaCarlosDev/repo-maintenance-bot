@@ -1,19 +1,17 @@
 [Unit]
-Description=GitHub Streak Keeper - Real Maintenance Service
-Documentation=https://github.com/AvilaCarlosDev/github-streak-keeper
+Description=Repo Maintenance Bot
+Documentation=https://github.com/AvilaCarlosDev/repo-maintenance-bot
 After=network-online.target
+Wants=network-online.target
 
 [Service]
 Type=oneshot
-WorkingDirectory=/home/carlosdev/proyectos/github-streak-keeper
-
-# Empieza con dry-run. Cambia a STREAK_KEEPER_PUSH=1 cuando confirmes que todo está bien.
-# Environment=STREAK_KEEPER_DRY_RUN=1
-Environment=STREAK_KEEPER_PUSH=1
-
-ExecStart=/home/carlosdev/proyectos/github-streak-keeper/auto-commit.sh /home/carlosdev/proyectos/mi-proyecto
-StandardOutput=journal
-StandardError=journal
+WorkingDirectory=%h/projects/repo-maintenance-bot
+Environment=REPO_MAINTENANCE_DRY_RUN=1
+ExecStart=/usr/bin/env bash %h/projects/repo-maintenance-bot/auto-commit.sh %h/projects/my-project
+NoNewPrivileges=true
+PrivateTmp=true
+Nice=10
 
 [Install]
 WantedBy=default.target

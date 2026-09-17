@@ -1,34 +1,12 @@
-# ================================================================
-# GitHub Streak Keeper - Cron Example
-# ================================================================
+# Repo Maintenance Bot — cron example
 #
-# Recomendación: usarlo como mantenimiento real, no como spam de commits.
-# Empieza con STREAK_KEEPER_DRY_RUN=1 y revisa logs antes de activar push.
-#
-# Ver crontab actual:
-#   crontab -l
-#
-# Editar crontab:
-#   crontab -e
-# ================================================================
+# Review and replace every path before installation.
+# Start with dry-run and inspect the log.
 
-# Simulación diaria a las 8:30 AM
-30 8 * * * STREAK_KEEPER_DRY_RUN=1 /home/carlosdev/proyectos/github-streak-keeper/auto-commit.sh /home/carlosdev/proyectos/mi-proyecto >> /tmp/streak-keeper.log 2>&1
+# Daily dry-run at 08:30.
+30 8 * * * REPO_MAINTENANCE_DRY_RUN=1 /home/USER/projects/repo-maintenance-bot/auto-commit.sh /home/USER/projects/my-project >> /home/USER/.local/state/repo-maintenance-bot/cron.log 2>&1
 
-# Producción diaria a las 9:00 AM con push habilitado
-0 9 * * * STREAK_KEEPER_PUSH=1 /home/carlosdev/proyectos/github-streak-keeper/auto-commit.sh /home/carlosdev/proyectos/mi-proyecto >> /tmp/streak-keeper.log 2>&1
-
-# ================================================================
-# COMANDOS ÚTILES
-# ================================================================
+# After validating dry-run behavior, local commits can be enabled by removing
+# REPO_MAINTENANCE_DRY_RUN=1. Push remains disabled unless explicitly enabled.
 #
-# Ver logs en tiempo real:
-#   tail -f /tmp/streak-keeper.log
-#
-# Ver últimas 50 líneas:
-#   tail -n 50 /tmp/streak-keeper.log
-#
-# Eliminar jobs manualmente:
-#   crontab -e
-#
-# ================================================================
+# 0 9 * * * /home/USER/projects/repo-maintenance-bot/auto-commit.sh /home/USER/projects/my-project >> /home/USER/.local/state/repo-maintenance-bot/cron.log 2>&1
