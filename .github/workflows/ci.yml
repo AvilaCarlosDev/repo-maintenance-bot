@@ -23,10 +23,10 @@ jobs:
           sudo apt-get install --yes shellcheck
 
       - name: Check Bash syntax
-        run: bash -n auto-commit.sh tests/run.sh
+        run: bash -n auto-commit.sh tests/run.sh scripts/demo-session.sh
 
       - name: Run ShellCheck
-        run: shellcheck auto-commit.sh tests/run.sh
+        run: shellcheck auto-commit.sh tests/run.sh scripts/demo-session.sh
 
       - name: Run behavior tests
         run: tests/run.sh
