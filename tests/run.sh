@@ -311,6 +311,84 @@ test_untracked_maintenance_files_are_rejected() {
     assert_contains "$TEST_ROOT/untracked.output" "unexpectedly changed untracked.txt"
 }
 
+run_bot_many() {
+    local case_name="$1"
+    shift
+
+    env "PATH=$TEST_ROOT/bin:$ORIGINAL_PATH" \
+        "CHECKPOINT_DIR=$TEST_ROOT/checkpoints-$case_name" \
+        "LOG_FILE=$TEST_ROOT/$case_name.log" \
+        "$BOT" "$@" >"$TEST_ROOT/$case_name.output" 2>&1
+}
+
+test_invalid_flag_value_is_rejected() {
+    local repo head_before
+    repo="$(create_fixture invalid-flag)"
+    head_before="$(git -C "$repo" rev-parse HEAD)"
+
+    if run_bot invalid-flag "$repo" REPO_MAINTENANCE_DRY_RUN=2; then
+        printf '  an invalid flag value was accepted\n' >&2
+        return 1
+    fi
+    assert_contains "$TEST_ROOT/invalid-flag.output" "must be 0 or 1" || return 1
+    assert_eq "$head_before" "$(git -C "$repo" rev-parse HEAD)" "the repository changed despite the invalid flag" || return 1
+}
+
+test_no_arguments_prints_usage() {
+    if run_bot_many no-arguments; then
+        printf '  running without repositories should fail\n' >&2
+        return 1
+    fi
+    assert_contains "$TEST_ROOT/no-arguments.output" "Usage:"
+}
+
+test_path_with_spaces_is_supported() {
+    local repo changed_files
+    repo="$(create_fixture "repo with spaces")"
+
+    run_bot spaces "$repo" FAKE_NPM_BUILD_OUTPUT=1 || return 1
+    changed_files="$(git -C "$repo" show --pretty='' --name-only HEAD)"
+    assert_eq "package-lock.json" "$changed_files" "a path with spaces was not handled" || return 1
+}
+
+test_repository_without_lockfile_is_left_untouched() {
+    local repo head_before
+    repo="$(create_fixture no-lockfile)"
+    git -C "$repo" rm -q package-lock.json
+    git -C "$repo" commit -q -m "remove lockfile"
+    head_before="$(git -C "$repo" rev-parse HEAD)"
+
+    run_bot no-lockfile "$repo" || true
+    assert_eq "$head_before" "$(git -C "$repo" rev-parse HEAD)" "a repository without lockfile received a commit" || return 1
+    assert_eq "" "$(git -C "$repo" status --porcelain)" "a repository without lockfile was modified" || return 1
+}
+
+test_directory_that_is_not_a_repository_is_untouched() {
+    local plain
+    plain="$TEST_ROOT/plain-directory"
+    mkdir -p "$plain"
+    printf '{"name":"x"}\n' >"$plain/package.json"
+
+    if run_bot not-a-repo "$plain"; then
+        printf '  a directory that is not a repository should fail\n' >&2
+        return 1
+    fi
+    [[ ! -e "$plain/.git" ]] || return 1
+    assert_eq "package.json" "$(ls -A "$plain")" "the directory was modified" || return 1
+}
+
+test_missing_path_does_not_stop_the_other_repositories() {
+    local repo
+    repo="$(create_fixture after-missing)"
+
+    if run_bot_many missing-first "$TEST_ROOT/does-not-exist" "$repo"; then
+        printf '  a missing repository should make the run report a failure\n' >&2
+        return 1
+    fi
+    assert_eq "package-lock.json" "$(git -C "$repo" show --pretty='' --name-only HEAD)" "the valid repository was not processed" || return 1
+    assert_contains "$TEST_ROOT/missing-first.output" "1 processed, 1 failed"
+}
+
 run_test() {
     local name="$1"
     local function_name="$2"
@@ -336,6 +414,12 @@ run_test "concurrent source changes are preserved and rejected" test_concurrent_
 run_test "push is explicit and functional" test_push_is_explicit_and_functional
 run_test "validation cannot replace the installed lockfile" test_validation_cannot_replace_tested_lockfile
 run_test "untracked maintenance files are rejected" test_untracked_maintenance_files_are_rejected
+run_test "invalid flag values are rejected before touching anything" test_invalid_flag_value_is_rejected
+run_test "running without repositories prints usage" test_no_arguments_prints_usage
+run_test "repository paths with spaces are supported" test_path_with_spaces_is_supported
+run_test "repository without a lockfile is left untouched" test_repository_without_lockfile_is_left_untouched
+run_test "a directory that is not a repository is left untouched" test_directory_that_is_not_a_repository_is_untouched
+run_test "a missing path does not stop the other repositories" test_missing_path_does_not_stop_the_other_repositories
 
 printf '\n%d passed, %d failed\n' "$PASS_COUNT" "$FAIL_COUNT"
 [[ "$FAIL_COUNT" -eq 0 ]]
