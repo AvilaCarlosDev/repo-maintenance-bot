@@ -1,5 +1,7 @@
 # Repo Maintenance Bot
 
+[English](README.en.md) · **Español**
+
 > Automatización local y transaccional para actualizar lockfiles npm, validar el árbol actualizado y crear un commit solo cuando la evidencia pasa.
 
 [![CI](https://github.com/AvilaCarlosDev/repo-maintenance-bot/actions/workflows/ci.yml/badge.svg)](https://github.com/AvilaCarlosDev/repo-maintenance-bot/actions/workflows/ci.yml)
@@ -113,7 +115,9 @@ Los ejemplos empiezan en dry-run. Ninguno habilita push por defecto.
     bash -n auto-commit.sh tests/run.sh
     tests/run.sh
 
-La suite crea repositorios temporales y usa un npm controlado; nunca ejecuta el bot contra tus repositorios reales.
+La suite crea repositorios temporales y usa un npm controlado; nunca ejecuta el bot contra tus repositorios reales. Son 19 pruebas de comportamiento: las garantías principales más casos límite (valores inválidos de las variables, ejecución sin argumentos, rutas con espacios, repositorio sin lockfile, un directorio que no es un repositorio y una ruta inexistente que no debe detener a los demás repositorios).
+
+**No probado:** Windows y macOS (el CI es solo Ubuntu), gestores de paquetes distintos de npm, repositorios muy grandes y la ejecución con un `npm` real contra registros reales; la suite usa un `npm` simulado.
 
 ## Sobre las rachas de contribuciones
 
@@ -125,6 +129,10 @@ Este proyecto nació con otro nombre orientado a mantener una racha de GitHub. E
 
 Consulta [SECURITY.md](SECURITY.md) para reportar vulnerabilidades sin publicar detalles sensibles.
 
+## Créditos
+
+Creado y mantenido por [Carlos Avila](https://github.com/AvilaCarlosDev). Desarrollado con el apoyo de Claude (Anthropic) como asistente de revisión de arquitectura y redacción de pruebas; las decisiones de diseño y la revisión final son del autor.
+
 ## Licencia
 
-MIT — ver [LICENSE](LICENSE). Creado por [Carlos Avila](https://github.com/AvilaCarlosDev).
+MIT — ver [LICENSE](LICENSE).

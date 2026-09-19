@@ -1,0 +1,14 @@
+name: Propuesta / Feature request
+description: Sugiere una mejora / Suggest an improvement
+labels: [enhancement]
+body:
+  - type: textarea
+    id: propuesta
+    attributes:
+      label: Qué propones y por qué / What you propose and why
+    validations:
+      required: true
+  - type: textarea
+    id: alternativas
+    attributes:
+      label: Alternativas consideradas / Alternatives considered
