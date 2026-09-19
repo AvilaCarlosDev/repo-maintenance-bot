@@ -30,3 +30,35 @@ jobs:
 
       - name: Run behavior tests
         run: tests/run.sh
+
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository (full history)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Scan for committed secrets (gitleaks)
+        uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  provenance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository (full history)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Reject AI watermarks in files and commit messages
+        run: |
+          pattern='Generated (by|with) (AI|Claude|ChatGPT|Copilot)|claude\.ai/code|Claude-Session'
+          if git grep -nEi "$pattern" -- . ':!README*.md' ':!.github/workflows/ci.yml'; then
+            echo "::error::AI watermark found in tracked files"; exit 1
+          fi
+          if git log --format=%B | grep -Ei "^(Co-Authored-By: *(Claude|ChatGPT|Copilot)|Claude-Session:)"; then
+            echo "::error::AI trailer found in commit messages"; exit 1
+          fi
+
