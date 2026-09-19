@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Vulnerabilidad de seguridad / Security vulnerability
+    url: https://github.com/AvilaCarlosDev/repo-maintenance-bot/security/advisories/new
+    about: Reporta de forma privada, no en un issue público / Report privately, not in a public issue.
